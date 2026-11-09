@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7f4">
+  <title>日常 - 任务与随笔</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #f4f7f4;
+      --paper: #fff;
+      --ink: #202923;
+      --muted: #78827b;
+      --line: #e6ebe6;
+      --green: #32785a;
+      --green-dark: #245b43;
+      --green-soft: #e6f1e9;
+      --coral: #d77b60;
+      --yellow: #e9b94f;
+      --blue: #64859a;
+      --shadow: 0 12px 35px rgba(32, 55, 40, .055);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); min-height: 100vh; }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid rgba(50,120,90,.22); outline-offset: 2px; }
+    .app { min-height: 100vh; }
+    .sidebar { width: 248px; position: fixed; inset: 0 auto 0 0; display: flex; flex-direction: column; padding: 27px 18px 18px; background: rgba(255,255,255,.88); border-right: 1px solid var(--line); z-index: 5; }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px; margin-bottom: 43px; }
+    .brand-mark { width: 37px; height: 37px; border-radius: 12px; display: grid; place-items: center; color: white; background: var(--green); font-size: 19px; font-weight: 700; box-shadow: 0 5px 12px rgba(50,120,90,.18); }
+    .brand-name { font-weight: 700; font-size: 17px; letter-spacing: .2px; }
+    .brand-caption { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .nav-label { padding: 0 12px; color: #9aa39d; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; margin: 0 0 9px; }
+    .nav { display: grid; gap: 5px; }
+    .nav-button { border: 0; background: transparent; border-radius: 9px; min-height: 43px; padding: 0 12px; display: flex; align-items: center; gap: 12px; text-align: left; color: #68736b; cursor: pointer; transition: background .18s, color .18s, transform .18s; }
+    .nav-button:hover { background: #f4f7f4; color: var(--ink); }
+    .nav-button.active { background: var(--green-soft); color: var(--green-dark); font-weight: 650; }
+    .nav-icon { width: 20px; font-size: 17px; text-align: center; line-height: 1; }
+    .nav-count { margin-left: auto; color: #859087; font-size: 11px; }
+    .sidebar-bottom { margin-top: auto; }
+    .week-card { padding: 15px 14px 13px; border: 1px solid var(--line); border-radius: 11px; background: #fbfcfb; }
+    .week-top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 650; }
+    .week-top span:last-child { color: var(--green); font-size: 11px; }
+    .week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 13px; }
+    .week-day { text-align: center; font-size: 9px; color: #9aa39d; }
+    .week-date { width: 25px; height: 25px; margin: 6px auto 0; display: grid; place-items: center; border-radius: 50%; color: #68736b; font-size: 10px; }
+    .week-date.today { background: var(--green); color: white; font-weight: 700; }
+    .profile { margin-top: 18px; display: flex; align-items: center; gap: 10px; padding: 9px 8px 0; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #f5dfd4; color: #8b503b; font-size: 13px; font-weight: 700; }
+    .profile-name { font-size: 12px; font-weight: 650; }
+    .profile-sub { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .main { margin-left: 248px; padding: 30px 42px 54px; max-width: 1600px; }
+    .topbar { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-height: 34px; }
+    .icon-button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 9px; display: grid; place-items: center; background: var(--paper); cursor: pointer; color: #67736a; transition: border-color .18s, color .18s, transform .18s; }
+    .icon-button:hover { border-color: #cad9ce; color: var(--green); transform: translateY(-1px); }
+    .icon-button .glyph { font-size: 16px; line-height: 1; }
+    .date-picker { position: relative; }
+    .date-picker input { position: absolute; inset: 0; opacity: 0; width: 36px; cursor: pointer; }
+    .page-head { margin: 39px 0 31px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+    .eyebrow { color: var(--green); text-transform: uppercase; font-size: 10px; font-weight: 750; letter-spacing: 1.25px; margin-bottom: 11px; }
+    h1 { font-size: 31px; line-height: 1.25; letter-spacing: 0; margin: 0; font-weight: 680; }
+    .head-subtitle { margin: 9px 0 0; font-size: 13px; color: var(--muted); }
+    .date-control { display: flex; align-items: center; gap: 5px; padding-bottom: 2px; }
+    .date-control button { width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; color: #7c877e; cursor: pointer; font-size: 19px; }
+    .date-control button:hover { background: white; color: var(--green); }
+    .date-text { min-width: 105px; text-align: center; font-size: 12px; font-weight: 650; }
+    .daily-thought { margin: -8px 0 23px; padding: 5px 0 5px 14px; border-left: 2px solid var(--coral); }
+    .thought-label { color: #a36a55; font-size: 9px; font-weight: 750; letter-spacing: .7px; display: flex; justify-content: space-between; gap: 14px; }
+    .thought-index { color: #9aa39d; font-weight: 500; letter-spacing: 0; white-space: nowrap; }
+    .thought-text { margin: 5px 0 0; color: #48534b; font-family: "Iowan Old Style", "Noto Serif SC", "Songti SC", serif; font-size: 14px; line-height: 1.75; }
+    .thought-source { margin-top: 5px; color: #9aa39d; font-size: 9px; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.23fr) minmax(310px, .77fr); gap: 28px; align-items: start; }
+    .panel { background: var(--paper); border: 1px solid rgba(225,232,226,.9); border-radius: 13px; box-shadow: var(--shadow); }
+    .tasks-panel { padding: 23px 25px 24px; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .panel-title { font-size: 16px; font-weight: 700; margin: 0; }
+    .panel-description { font-size: 11px; color: var(--muted); margin: 5px 0 0; }
+    .task-total { color: #7a857d; font-size: 11px; white-space: nowrap; padding-top: 4px; }
+    .progress-wrap { margin: 20px 0 18px; padding: 14px 15px; border-radius: 9px; background: #f5f8f5; display: flex; align-items: center; gap: 13px; }
+    .progress-ring { --progress: 0%; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--green) var(--progress), #dfe8e1 0); position: relative; }
+    .progress-ring::before { content: ""; position: absolute; inset: 4px; background: #f5f8f5; border-radius: 50%; }
+    .progress-ring span { position: relative; font-size: 10px; font-weight: 750; color: var(--green-dark); }
+    .progress-copy { min-width: 0; flex: 1; }
+    .progress-title { font-size: 11px; font-weight: 650; }
+    .progress-caption { color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .progress-bar { height: 4px; width: 76px; flex: 0 0 auto; border-radius: 5px; overflow: hidden; background: #e2eae3; }
+    .progress-fill { height: 100%; width: 0; background: var(--green); border-radius: inherit; transition: width .35s ease; }
+    .task-list { display: grid; }
+    .task-row { min-height: 57px; border-bottom: 1px solid #edf0ed; display: flex; align-items: center; gap: 12px; padding: 7px 3px; animation: arrive .22s ease both; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .check { width: 19px; height: 19px; flex: 0 0 auto; border: 1.5px solid #cbd5cd; border-radius: 6px; background: white; cursor: pointer; display: grid; place-items: center; padding: 0; transition: background .18s, border-color .18s, transform .18s; }
+    .check:hover { border-color: var(--green); transform: scale(1.06); }
+    .check.done { border-color: var(--green); color: white; background: var(--green); font-size: 12px; }
+    .task-main { flex: 1; min-width: 0; }
+    .task-name { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+    .task-row.completed .task-name { color: #9ba49d; text-decoration: line-through; text-decoration-color: #b4beb7; }
+    .task-meta { font-size: 9px; color: #a0a9a2; margin-top: 3px; }
+    .priority { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); margin-right: 3px; flex: 0 0 auto; }
+    .priority.normal { background: #aab7ad; }
+    .priority.low { background: #bdc9d0; }
+    .task-delete { opacity: 0; border: 0; background: transparent; color: #9ca59e; width: 28px; height: 28px; cursor: pointer; border-radius: 6px; font-size: 17px; transition: opacity .15s, color .15s, background .15s; }
+    .task-row:hover .task-delete, .task-delete:focus-visible { opacity: 1; }
+    .task-delete:hover { color: #bd6249; background: #fbefeb; }
+    .empty-state { padding: 32px 10px 29px; text-align: center; color: var(--muted); }
+    .empty-symbol { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--green-soft); color: var(--green); font-size: 18px; margin: 0 auto 11px; }
+    .empty-title { color: #59645c; font-size: 12px; font-weight: 650; }
+    .empty-caption { margin-top: 5px; font-size: 10px; }
+    .add-task { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .add-task input { flex: 1; width: 0; min-width: 0; height: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; background: #fcfdfc; color: var(--ink); font-size: 11px; }
+    .add-task input::placeholder { color: #9ca59f; }
+    .add-task button { height: 40px; border: 0; background: var(--green); color: white; border-radius: 8px; padding: 0 14px; font-size: 11px; font-weight: 650; cursor: pointer; transition: background .18s, transform .18s; white-space: nowrap; }
+    .add-task button:hover, .primary-button:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .task-options { margin: 10px 0 0 29px; display: flex; align-items: center; gap: 8px; color: #98a199; font-size: 10px; }
+    .task-options select { border: 0; background: transparent; color: #738076; font-size: 10px; padding: 3px; cursor: pointer; }
+    .right-column { display: grid; gap: 20px; }
+    .journal-panel { padding: 22px 22px 19px; }
+    .journal-heading { display: flex; justify-content: space-between; align-items: center; }
+    .journal-heading .panel-title { font-size: 15px; }
+    .journal-date { color: #9aa39d; font-size: 10px; }
+    .journal-panel textarea { display: block; width: 100%; min-height: 153px; margin-top: 17px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; padding: 13px 13px; line-height: 1.75; background: #fbfcfb; color: var(--ink); font-size: 11px; }
+    .journal-panel textarea::placeholder { color: #9ba49d; }
+    .journal-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+    .save-hint { color: #95a098; font-size: 9px; }
+    .primary-button { border: 0; color: white; background: var(--green); border-radius: 7px; padding: 9px 13px; font-size: 10px; font-weight: 650; cursor: pointer; transition: background .18s, transform .18s; }
+    .recent-panel { padding: 20px 22px 8px; }
+    .recent-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; }
+    .recent-header h2 { font-size: 13px; margin: 0; font-weight: 700; }
+    .text-button { border: 0; background: transparent; color: var(--green); padding: 5px 0; font-size: 10px; cursor: pointer; }
+    .note-preview { width: 100%; border: 0; border-top: 1px solid #edf0ed; background: transparent; padding: 12px 0; text-align: left; cursor: pointer; }
+    .note-preview:hover .note-preview-title { color: var(--green); }
+    .note-preview-title { display: block; font-size: 11px; font-weight: 650; transition: color .15s; }
+    .note-preview-body { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 5px; color: #78827b; font-size: 10px; line-height: 1.6; }
+    .note-preview-date { display: block; margin-top: 7px; color: #a0a9a2; font-size: 9px; }
+    .recent-empty { padding: 18px 0 22px; text-align: center; color: #97a199; font-size: 10px; }
+    .notes-view, .calendar-view { display: none; }
+    .view-heading { margin: 39px 0 25px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .view-heading h1 { font-size: 28px; }
+    .view-heading p { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+    .search-box { display: flex; align-items: center; gap: 8px; width: min(300px, 100%); height: 38px; border: 1px solid var(--line); border-radius: 8px; padding: 0 11px; background: white; color: #88928a; }
+    .search-box input { border: 0; outline: 0; background: transparent; min-width: 0; width: 100%; font-size: 11px; color: var(--ink); }
+    .notes-layout { display: grid; grid-template-columns: minmax(240px, .75fr) minmax(0, 1.25fr); gap: 20px; }
+    .notes-list-panel, .note-editor { padding: 20px; }
+    .note-list-item { display: block; width: 100%; text-align: left; border: 0; border-top: 1px solid #edf0ed; background: transparent; padding: 14px 4px; cursor: pointer; }
+    .note-list-item.selected { border-left: 2px solid var(--green); padding-left: 10px; background: #f7faf7; }
+    .note-list-item strong { display: block; font-size: 11px; }
+    .note-list-item span { display: block; color: var(--muted); font-size: 10px; line-height: 1.6; margin-top: 5px; }
+    .note-list-item time { display: block; color: #a0a9a2; font-size: 9px; margin-top: 7px; }
+    .note-editor input { width: 100%; border: 0; border-bottom: 1px solid var(--line); padding: 5px 0 13px; font-size: 18px; font-weight: 650; color: var(--ink); background: transparent; }
+    .note-editor textarea { width: 100%; min-height: 260px; resize: vertical; border: 0; padding: 16px 0; font-size: 12px; line-height: 1.9; color: #4c584f; background: transparent; }
+    .editor-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 12px; }
+    .editor-footer span { color: var(--muted); font-size: 10px; }
+    .calendar-panel { padding: 24px; max-width: 760px; }
+    .calendar-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 21px; }
+    .calendar-toolbar strong { font-size: 16px; }
+    .calendar-arrows { display: flex; gap: 5px; }
+    .calendar-arrows button { border: 1px solid var(--line); background: white; width: 31px; height: 31px; border-radius: 7px; cursor: pointer; color: #68736b; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .calendar-weekday { text-align: center; color: #99a39b; font-size: 10px; padding-bottom: 9px; }
+    .calendar-day { min-height: 69px; border: 1px solid transparent; border-radius: 8px; background: #f8faf8; padding: 8px; text-align: left; cursor: pointer; color: #535f56; font-size: 11px; }
+    .calendar-day:hover { border-color: #c9dbce; background: #f2f8f3; }
+    .calendar-day.outside { color: #b8c0ba; background: transparent; }
+    .calendar-day.today { border-color: var(--green); color: var(--green-dark); font-weight: 700; }
+    .calendar-day.selected { background: var(--green); color: white; }
+    .day-dots { display: flex; gap: 3px; margin-top: 10px; }
+    .day-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
+    .calendar-day.selected .day-dot { background: white; }
+    .selected-date-summary { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 15px; font-size: 11px; color: var(--muted); }
+    .toast { position: fixed; left: 50%; bottom: 28px; z-index: 20; transform: translate(-50%, 12px); background: #253b2d; color: white; padding: 10px 15px; border-radius: 8px; font-size: 11px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; box-shadow: 0 8px 25px rgba(20,40,27,.18); }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .mobile-nav { display: none; }
+    @media (max-width: 1080px) {
+      .sidebar { width: 215px; }
+      .main { margin-left: 215px; padding: 26px 26px 48px; }
+      .content-grid { grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 18px; }
+      .tasks-panel { padding: 21px 19px; }
+      .journal-panel, .recent-panel { padding-left: 18px; padding-right: 18px; }
+      .progress-bar { width: 50px; }
+    }
+    @media (max-width: 820px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 17px 18px 92px; }
+      .topbar { min-height: 32px; }
+      .page-head { margin: 25px 0 23px; align-items: flex-start; flex-direction: column; gap: 16px; }
+      h1 { font-size: 26px; }
+      .head-subtitle { font-size: 12px; }
+      .date-control { align-self: stretch; justify-content: space-between; border: 1px solid var(--line); background: white; border-radius: 8px; padding: 3px 7px; }
+      .date-control button { width: 30px; height: 29px; }
+      .date-text { flex: 1; }
+      .daily-thought { margin: -7px 0 18px; padding-left: 12px; }
+      .thought-text { font-size: 13px; }
+      .content-grid { grid-template-columns: 1fr; gap: 16px; }
+      .tasks-panel { padding: 20px 18px; }
+      .right-column { grid-template-columns: 1fr; gap: 15px; }
+      .journal-panel { padding: 19px 18px 17px; }
+      .journal-panel textarea { min-height: 125px; }
+      .recent-panel { padding: 18px 18px 7px; }
+      .task-delete { opacity: 1; }
+      .mobile-nav { position: fixed; inset: auto 0 0; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px max(12px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(255,255,255,.96); backdrop-filter: blur(14px); }
+      .mobile-nav .nav-button { min-height: 48px; justify-content: center; flex-direction: column; gap: 3px; padding: 3px; font-size: 9px; }
+      .mobile-nav .nav-icon { font-size: 16px; }
+      .mobile-nav .nav-count { display: none; }
+      .view-heading { margin: 25px 0 20px; align-items: flex-start; flex-direction: column; }
+      .search-box { width: 100%; }
+      .notes-layout { grid-template-columns: 1fr; }
+      .notes-list-panel { padding: 17px; }
+      .notes-list-panel .panel-title { margin-bottom: 9px; }
+      .note-editor { padding: 18px; }
+      .calendar-panel { padding: 17px; }
+      .calendar-day { min-height: 53px; padding: 6px; }
+    }
+    @media (max-width: 390px) {
+      .main { padding-left: 13px; padding-right: 13px; }
+      .progress-wrap { padding: 12px; gap: 9px; }
+      .progress-bar { width: 38px; }
+      .add-task { gap: 7px; }
+      .add-task button { padding: 0 10px; }
+      .calendar-day { min-height: 45px; font-size: 10px; }
+      .day-dots { margin-top: 7px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand">
+        <div class="brand-mark">日</div>
+        <div><div class="brand-name">日常</div><div class="brand-caption">把每一天过成自己的节奏</div></div>
+      </div>
+      <div class="nav-label">工作空间</div>
+      <nav class="nav">
+        <button class="nav-button active" data-view="today"><span class="nav-icon">◷</span><span>今天</span><span class="nav-count" id="nav-task-count">0</span></button>
+        <button class="nav-button" data-view="notes"><span class="nav-icon">▤</span><span>随笔</span><span class="nav-count" id="nav-note-count">0</span></button>
+        <button class="nav-button" data-view="calendar"><span class="nav-icon">▦</span><span>日历</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="week-card">
+          <div class="week-top"><span>这一周</span><span id="week-progress">0 项完成</span></div>
+          <div class="week-days" id="week-days"></div>
+        </div>
+        <div class="profile"><div class="avatar">我</div><div><div class="profile-name">我的空间</div><div class="profile-sub">内容保存在此设备</div></div></div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <button class="icon-button" id="export-button" aria-label="导出数据" title="导出数据"><span class="glyph">⇩</span></button>
+        <label class="icon-button date-picker" aria-label="选择日期" title="选择日期"><span class="glyph">▦</span><input id="date-picker" type="date" aria-label="选择日期"></label>
+      </div>
+      <section class="today-view" id="today-view">
+        <header class="page-head">
+          <div><div class="eyebrow" id="today-eyebrow">星期一 · 每一天都是新的开始</div><h1 id="greeting">今天，按自己的节奏来。</h1><p class="head-subtitle">先从一件重要的小事开始。</p></div>
+          <div class="date-control"><button id="prev-day" aria-label="前一天" title="前一天">‹</button><div class="date-text" id="selected-date"></div><button id="next-day" aria-label="后一天" title="后一天">›</button><button id="go-today" title="回到今天" style="font-size:10px;width:auto;padding:0 8px">今天</button></div>
+        </header>
+        <aside class="daily-thought" aria-live="polite"><div class="thought-label"><span>每日名句</span><span class="thought-index" id="thought-index"></span></div><p class="thought-text" id="thought-text"></p><div class="thought-source" id="thought-source"></div></aside>
+        <div class="content-grid">
+          <section class="panel tasks-panel" aria-labelledby="task-heading">
+            <div class="panel-head"><div><h2 class="panel-title" id="task-heading">今日任务</h2><p class="panel-description">一步一步，把想做的事变成已完成。</p></div><div class="task-total" id="task-total">0 项</div></div>
+            <div class="progress-wrap"><div class="progress-ring" id="progress-ring"><span id="progress-number">0%</span></div><div class="progress-copy"><div class="progress-title" id="progress-title">今天刚刚开始</div><div class="progress-caption" id="progress-caption">写下今天想完成的第一件事</div></div><div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div></div>
+            <div class="task-list" id="task-list"></div>
+            <form class="add-task" id="task-form"><input id="task-input" maxlength="120" autocomplete="off" placeholder="添加一项今天想做的事…" aria-label="新任务内容"><button type="submit">＋ 添加任务</button></form>
+            <div class="task-options"><span>优先级</span><select id="task-priority" aria-label="任务优先级"><option value="high">重要</option><option value="normal" selected>普通</option><option value="low">稍后</option></select><span>·</span><span>按 Enter 快速添加</span></div>
+          </section>
+          <div class="right-column">
+            <section class="panel journal-panel" aria-labelledby="journal-heading">
+              <div class="journal-heading"><h2 class="panel-title" id="journal-heading">留一点空白给自己</h2><span class="journal-date" id="journal-date"></span></div>
+              <textarea id="quick-note" placeholder="此刻在想什么？记下来，不必完整，也不必等到以后。" aria-label="随手记"></textarea>
+              <div class="journal-actions"><span class="save-hint" id="save-hint">自动保存在此设备</span><button class="primary-button" id="save-note">保存随笔</button></div>
+            </section>
+            <section class="panel recent-panel" aria-labelledby="recent-heading"><div class="recent-header"><h2 id="recent-heading">最近的随笔</h2><button class="text-button" data-open-view="notes">查看全部 →</button></div><div id="recent-notes"></div></section>
+          </div>
+        </div>
+      </section>
+      <section class="notes-view" id="notes-view">
+        <header class="view-heading"><div><div class="eyebrow">JOURNAL</div><h1>随笔</h1><p>把那些一闪而过的念头，好好收起来。</p></div><label class="search-box"><span>⌕</span><input id="note-search" placeholder="搜索随笔…" aria-label="搜索随笔"></label></header>
+        <div class="notes-layout"><section class="panel notes-list-panel"><h2 class="panel-title">所有记录 <span id="notes-total" style="color:#929d94;font-size:10px;font-weight:500"></span></h2><div id="notes-list"></div></section><section class="panel note-editor"><input id="note-title" maxlength="80" placeholder="给这段随笔起个标题"><textarea id="note-body" placeholder="从这里开始写…"></textarea><div class="editor-footer"><span id="editor-status">选择一条随笔，或开始新的记录</span><div style="display:flex;gap:8px"><button class="text-button" id="new-note">＋ 新随笔</button><button class="primary-button" id="editor-save">保存</button></div></div></section></div>
+      </section>
+      <section class="calendar-view" id="calendar-view">
+        <header class="view-heading"><div><div class="eyebrow">YOUR DAYS</div><h1>日历</h1><p>回头看看，一天一天走过的痕迹。</p></div></header>
+        <section class="panel calendar-panel"><div class="calendar-toolbar"><strong id="calendar-month"></strong><div class="calendar-arrows"><button id="prev-month" aria-label="上个月">‹</button><button id="next-month" aria-label="下个月">›</button></div></div><div class="calendar-grid" id="calendar-grid"></div><div class="selected-date-summary" id="calendar-summary"></div></section>
+      </section>
+    </main>
+    <nav class="mobile-nav" aria-label="底部导航">
+      <button class="nav-button active" data-view="today"><span class="nav-icon">◷</span><span>今天</span></button>
+      <button class="nav-button" data-view="notes"><span class="nav-icon">▤</span><span>随笔</span></button>
+      <button class="nav-button" data-view="calendar"><span class="nav-icon">▦</span><span>日历</span></button>
+    </nav>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script>
+    (() => {
+      const STORE_KEY = 'daily-app-v1';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      let selectedDay = new Date(today);
+      let calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      let selectedNoteId = null;
+      let data = loadData();
+      let toastTimer;
+      const quotes = [
+        {text:'在隆冬，我终于知道，我身上有一个不可战胜的夏天。',author:'阿尔贝·加缪',work:'名家名篇·传世篇'},
+        {text:'冬天如果已经来了，春天还会远吗？',author:'珀西·比希·雪莱',work:'《西风颂》'},
+        {text:'岁寒，然后知松柏之后凋也。',author:'孔子',work:'《论语·子罕》'},
+        {text:'墙角数枝梅，凌寒独自开。遥知不是雪，为有暗香来。',author:'王安石',work:'《梅花》'},
+        {text:'咬定青山不放松，立根原在破岩中。千磨万击还坚劲，任尔东西南北风。',author:'郑燮',work:'《竹石》'},
+        {text:'人生到处知何似，应似飞鸿踏雪泥。泥上偶然留指爪，鸿飞那复计东西。',author:'苏轼',work:'《和子由渑池怀旧》'},
+        {text:'孤舟蓑笠翁，独钓寒江雪。',author:'柳宗元',work:'《江雪》'},
+        {text:'愿你生命中有足够多的云翳，来造成一个美丽的黄昏；愿你生命中有足够长久的严冬，来孕育一个繁花似锦的春天。',author:'冰心',work:'名家名篇·传世篇'},
+        {text:'没有一个冬天不可逾越，没有一个春天不会来临。',author:'海明威',work:'名家名篇·传世篇'},
+        {text:'当一切都冰封时，生命在冰层下最深沉地呼吸。',author:'罗曼·罗兰',work:'名家名篇·传世篇'},
+        {text:'晚来天欲雪，能饮一杯无？',author:'白居易',work:'《问刘十九》'},
+        {text:'柴门闻犬吠，风雪夜归人。',author:'刘长卿',work:'《逢雪宿芙蓉山主人》'},
+        {text:'白雪却嫌春色晚，故穿庭树作飞花。',author:'韩愈',work:'《春雪》'},
+        {text:'溪深难受雪，山冻不流云。',author:'洪升',work:'《雪望》'},
+        {text:'忽如一夜春风来，千树万树梨花开。',author:'岑参',work:'《白雪歌送武判官归京》'},
+        {text:'天地闭，贤人隐。冬者，岁之余，天地闭藏之气也。',author:'《周易》',work:'名家名篇·传世篇'},
+        {text:'冬天的大地把所有的绚烂收回根部，不是为了死亡，是为了更深厚的生。',author:'史铁生',work:'名家名篇·传世篇'},
+        {text:'人的一生总要经历几个冬天，唯有将自己站成一棵树，才能在寒风中等来繁花。',author:'汪国真',work:'名家名篇·传世篇'},
+        {text:'所谓冬天，不过是世界合上双眼，在白色的被单下做的一场关于春天的漫长梦境。',author:'木心',work:'名家名篇·传世篇'},
+        {text:'雪落无声，万物归寂，只有干净的心灵才能在这片白茫茫的大地上听见自己的脚步声。',author:'迟子建',work:'名家名篇·传世篇'},
+        {text:'绿蚁新醅酒，红泥小火炉。晚来天欲雪，能饮一杯无？',author:'白居易',work:'《问刘十九》'},
+        {text:'莫怪严凝切，春生下底深。',author:'苏轼',work:'名家名篇·传世篇'},
+        {text:'旋扑珠帘过粉墙，轻于柳絮重于霜。',author:'李商隐',work:'《对雪二首》'},
+        {text:'人间有味是清欢。细雨斜风作晓寒，淡烟疏柳媚晴滩。',author:'苏轼',work:'名家名篇·传世篇'},
+        {text:'晴雪初融，万物向暖，冬天总有些细碎的温柔，在等待被发现。',author:'林清玄',work:'名家名篇·传世篇'},
+        {text:'如果你来访我，我不在，请和我门外的花坐一会儿，它们很温暖，我不认识你，我觉得你很甜。',author:'顾城',work:'名家名篇·传世篇'},
+        {text:'屋外大雪纷飞，屋内炉火正旺，这便是人间最好的时刻。',author:'汪曾祺',work:'名家名篇·传世篇'},
+        {text:'我在冬日的大街上走着，呼出白气，心里想着一个人，整座城市就不再寒冷。',author:'普希金',work:'名家名篇·传世篇'},
+        {text:'人生如同暴风雪中的行路，只要前方的窗户里亮着一盏灯，你就不会迷失方向。',author:'屠格涅夫',work:'名家名篇·传世篇'},
+        {text:'岁月极美，在于它必然的流逝：春花，秋月，夏日，冬雪。',author:'三毛',work:'名家名篇·传世篇'},
+        {text:'朔风不是来折断你的，它是天地最严苛的铁匠，只在零度的铁砧上锻打真正的骨头。',author:'原创',work:'励志与傲骨'},
+        {text:'熬过最深的冻土，泥泞才会变成坚实的坦途；扛过最冽的霜雪，枝头才有资格开出桀骜的花。',author:'原创',work:'励志与傲骨'},
+        {text:'寒冬从不相信借口，它只检验你体内的炉火是否熄灭。只要火种不灭，天地再寒也不过是背景。',author:'原创',work:'励志与傲骨'},
+        {text:'凛冬是平庸者的避难所，却是勇者的淬火池。你若挺直腰杆，冰霜也只能是你铠甲上的纹路。',author:'原创',work:'励志与傲骨'},
+        {text:'真正的强者，从不在温室里祈求常青，而是在荒野的大雪里，把自己站成一座不可撼动的坐标。',author:'原创',work:'励志与傲骨'},
+        {text:'冬天斩断了所有虚张声势的枝叶，留下的，是无论风雪多大都绝不倒伏的干霄之木。',author:'原创',work:'励志与傲骨'},
+        {text:'别抱怨漫长的严寒，那是春天在向你索要配得上繁华的耐力。',author:'原创',work:'励志与傲骨'},
+        {text:'雪崩来临的时候，不要做随波逐流的雪花，要做那块劈开风雪的岩石。',author:'原创',work:'励志与傲骨'},
+        {text:'越是长夜漫漫，越要成为自己夜行时的那柄火把；越是冰封万里，越要走出自己的滚烫足迹。',author:'原创',work:'励志与傲骨'},
+        {text:'冬天的终点不是绝望，而是在白茫茫的天地之间，孤身一人也敢策马向前的魄力。',author:'原创',work:'励志与傲骨'},
+        {text:'当世界把温度降到最低，就是你把意志升到最高的时刻。',author:'原创',work:'励志与傲骨'},
+        {text:'岁暮天寒，草木皆枯，唯有骨子里的热血，能在冰霜的重压下煮沸整座严冬。',author:'原创',work:'励志与傲骨'},
+        {text:'那些在暴雪天里逆风前行留下的脚印，最终都会变成来年春天指引你凯旋的路标。',author:'原创',work:'励志与傲骨'},
+        {text:'不要怕冷风吹干了眼泪，冻结的泪痕，会变成脸颊上最锋利的棱角。',author:'原创',work:'励志与傲骨'},
+        {text:'沉潜是冬天的尊严，扎根是来生的野心。在暗无天日的泥土里，我正在筹备一场破土的春雷。',author:'原创',work:'励志与傲骨'},
+        {text:'寒冷是最好的清醒剂，它让你在世俗的温水里猛然抬头，看清自己真正要去的远方。',author:'原创',work:'励志与傲骨'},
+        {text:'把所有刺骨的冷眼与风刀，都铸成来年春天破土而出的利刃。',author:'原创',work:'励志与傲骨'},
+        {text:'冬日肃杀，但真正的生命从不求饶，它只是把所有炽热的心跳，紧紧锁进了最硬的核里。',author:'原创',work:'励志与傲骨'},
+        {text:'站在风口浪尖不叫本事，能在冰封三尺的湖面底下一声不吭地潜伏到底，才是大修行。',author:'原创',work:'励志与傲骨'},
+        {text:'暴风雪过后，留下的不是残破的荒野，而是一具被彻底洗练过、毫无破绽的灵魂。',author:'原创',work:'励志与傲骨'},
+        {text:'冬天是一场浩大的删繁就简，它剥离了世间所有的花哨，逼迫万物裸露出灵魂最真实的质地。',author:'原创',work:'哲理与通透'},
+        {text:'大雪掩盖了一切道路，不是为了让人迷失，而是提醒你：在无路可走的地方，重新定义方向。',author:'原创',work:'哲理与通透'},
+        {text:'极寒之处见真火，极静之处生天籁。冬天的深沉，是一首只弹给懂得倾听之人听的无弦琴。',author:'原创',work:'哲理与通透'},
+        {text:'落叶不是生命的败退，而是它把毕生的积蓄交还给土地，完成一场宏大而体面的归隐。',author:'原创',work:'哲理与通透'},
+        {text:'所谓的“藏”，是冬日最高级的智慧：收拢羽翼，封存热情，把喧嚣还给天地，把清净留给自己。',author:'原创',work:'哲理与通透'},
+        {text:'冰层之所以坚硬，是因为它在最冷的时候放下了对流动的执念；人若想通透，也要学会顺应季节的收敛。',author:'原创',work:'哲理与通透'},
+        {text:'天地闭藏，万物休眠。在这个季节，停止无效的奔忙，是对岁月最大的敬畏与成全。',author:'原创',work:'哲理与通透'},
+        {text:'枯荣有时，寒暑有常。冬不是生机的终结，而是生命为了下一次壮丽爆发所必须支付的休止符。',author:'原创',work:'哲理与通透'},
+        {text:'皑皑白雪不过是时间的一张素笺，万事皆空，唯有行者的足印，替岁月写下了唯一的证词。',author:'原创',work:'哲理与通透'},
+        {text:'冬天的风吹走了一切虚妄的附着物，剩下的顽石、老树与古井，才是世界颠扑不破的本质。',author:'原创',work:'哲理与通透'},
+        {text:'人生三万日，总有几个寒夜需要你独自慢熬；熬得过去是重生，熬不过去就成了风雪的注脚。',author:'原创',work:'哲理与通透'},
+        {text:'洁白到极致的雪景里，藏着最深邃的虚无；而这虚无之中，偏偏孕育着来年漫山遍野的盛大。',author:'原创',work:'哲理与通透'},
+        {text:'顺应寒冬的人不会冻伤，因为他早已在心室筑起了抵御极寒的炉膛。',author:'原创',work:'哲理与通透'},
+        {text:'冬水结冰，并非失去温度，而是将内心的澎湃凝成了晶莹的自守。',author:'原创',work:'哲理与通透'},
+        {text:'岁晚知松茂，夜深知雪重。生命的所有厚度，都是在最安静沉重的等待里悄然堆叠出来的。',author:'原创',work:'哲理与通透'},
+        {text:'冬天的沉默不是懦弱，而是一种极度高级的克制——不与朔风争高下，静待时雨定乾坤。',author:'原创',work:'哲理与通透'},
+        {text:'寒风剥去了所有绿叶的修饰，才让人看清：原来支撑整座森林不倒的，一直都是那些光秃秃的枝桠。',author:'原创',work:'哲理与通透'},
+        {text:'走在冬日空旷的旷野上，你会明白：原来生命的辽阔，从来不需要拥挤的人群来印证。',author:'原创',work:'哲理与通透'},
+        {text:'冬是四季的压轴，它用一整季的严寒与静默，为一整年的浮躁与得失画上最公正的句号。',author:'原创',work:'哲理与通透'},
+        {text:'当喧嚣落定、冰封千里，你终于能在这个绝对安静的世界里，听清自己心脏每一次搏动的声音。',author:'原创',work:'哲理与通透'},
+        {text:'漫天大雪里最动人的不是风景，而是呵着白气朝你跑过来时，手里那杯还温热的红茶。',author:'原创',work:'情感与温柔'},
+        {text:'冬天之所以冷，是为了让我们更清晰地感知彼此掌心贴近时，那稍纵即逝却刻骨铭心的温度。',author:'原创',work:'情感与温柔'},
+        {text:'街灯把雪花染成了碎金，长巷深处飘来烤红薯的甜香，生活的所有疲惫，都在这口热气里烟消云散。',author:'原创',work:'情感与温柔'},
+        {text:'我在积满厚雪的玻璃窗上写下你的名字，雾气散去之前，你就是我关于这个冬天唯一的秘密。',author:'原创',work:'情感与温柔'},
+        {text:'屋外北风呼啸，屋内热汤咕嘟。所谓幸福，不过是在最冷的日子里，有一方避风的屋檐和一盏不灭的灯。',author:'原创',work:'情感与温柔'},
+        {text:'冬天是一个适合拥抱的季节，隔着厚厚的大衣，也能听见两个灵魂撞在一起时沉闷而踏实的回响。',author:'原创',work:'情感与温柔'},
+        {text:'每一片落在你肩头的雪花，都是远方某个人未曾说出口的牵挂，在风中凝结成了最柔软的信笺。',author:'原创',work:'情感与温柔'},
+        {text:'天气越冷，人间的细节就越动人：毛线围巾的褶皱、煮沸牛奶的香气，还有暮色里归家人的急促脚步。',author:'原创',work:'情感与温柔'},
+        {text:'想和你在下雪的夜里一直走下去，不撑伞，不说话，就这样一路走到白头。',author:'原创',work:'情感与温柔'},
+        {text:'严冬把思念拉得很长，长到每一次呼吸呼出的白雾里，都写满了想见你的借口。',author:'原创',work:'情感与温柔'},
+        {text:'寒风吹不透紧闭的门窗，世态炎凉也盖不住围炉夜话时眼底的那抹融融暖意。',author:'原创',work:'情感与温柔'},
+        {text:'冬日午后的阳光总带着几分慈悲，它斜斜地照在旧木桌上，把光阴晒成了一种极慵懒的温柔。',author:'原创',work:'情感与温柔'},
+        {text:'愿这个冬天的你，有衣暖身，有人暖心，下雪有人撑伞，归家有人留灯。',author:'原创',work:'情感与温柔'},
+        {text:'外面是零下十度的世界，可只要想到你，胸口就藏着一整个南方的四月天。',author:'原创',work:'情感与温柔'},
+        {text:'冬天的夜很长，足够我们把琐碎的往事翻出来，就着一壶温好的黄酒，慢慢聊到天明。',author:'原创',work:'情感与温柔'},
+        {text:'那一年冬天很冷，冷到所有人都行色匆匆，只有你停下脚步，把冻僵的手递进了我的大衣口袋。',author:'原创',work:'情感与温柔'},
+        {text:'雪花是冬天的眼泪，也是大地的婚纱，它覆平了人间的沟壑，成全了所有未完待续的重逢。',author:'原创',work:'情感与温柔'},
+        {text:'寒夜客来茶当酒，竹炉汤沸火初红。最深的冬意里，藏着中国人最清雅的深情。',author:'原创',work:'情感与温柔'},
+        {text:'别怕冬天的漫长，那些藏在雪地里的种子、等在炉火旁的故人，都在无声地替你守候着明天。',author:'原创',work:'情感与温柔'},
+        {text:'愿岁并谢，与长友兮。在这场席卷人间的冬雪落幕之前，愿你与所有想要珍惜的温暖，岁岁相安。',author:'原创',work:'情感与温柔'}
+      ];
+
+      function loadData() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+          return { tasks: Array.isArray(raw.tasks) ? raw.tasks : [], notes: Array.isArray(raw.notes) ? raw.notes : [] };
+        } catch { return { tasks: [], notes: [] }; }
+      }
+      function persist() { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+      function dateKey(date) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+      function parseDay(key) { const [y,m,d] = key.split('-').map(Number); return new Date(y, m-1, d); }
+      function sameDay(a,b) { return dateKey(a) === dateKey(b); }
+      function escapeHTML(value) { return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
+      function shortDate(key, includeYear = false) { const d = parseDay(key); return new Intl.DateTimeFormat('zh-CN', { month:'long', day:'numeric', ...(includeYear ? {year:'numeric'} : {}) }).format(d); }
+      function fullDate(date) { return new Intl.DateTimeFormat('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'}).format(date); }
+      function dayOfWeek(date) { return new Intl.DateTimeFormat('zh-CN',{weekday:'long'}).format(date); }
+      function showToast(message) { const toast=document.getElementById('toast'); toast.textContent=message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),1900); }
+      function tasksForDay(key) { return data.tasks.filter(task => task.date === key).sort((a,b) => a.createdAt - b.createdAt); }
+      function notesSorted() { return [...data.notes].sort((a,b)=>b.updatedAt-a.updatedAt); }
+      const quoteOrder = (() => {
+        const ordered=quotes.slice(); let seed=0x09a11726;
+        for(let i=ordered.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;const j=seed%(i+1);[ordered[i],ordered[j]]=[ordered[j],ordered[i]]}
+        return ordered;
+      })();
+      function thoughtForDay(date) {
+        const start=Date.UTC(2026,10,9), current=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate());
+        const offset=Math.floor((current-start)/86400000), index=((offset%quoteOrder.length)+quoteOrder.length)%quoteOrder.length;
+        return {quote:quoteOrder[index],day:index+1};
+      }
+
+      function renderToday() {
+        const key = dateKey(selectedDay);
+        document.getElementById('selected-date').textContent = fullDate(selectedDay);
+        document.getElementById('journal-date').textContent = shortDate(key);
+        document.getElementById('today-eyebrow').textContent = `${dayOfWeek(selectedDay)} · ${sameDay(selectedDay,today) ? '每一天都是新的开始' : '为这一天留下一点记录'}`;
+        document.getElementById('greeting').textContent = sameDay(selectedDay,today) ? '今天，按自己的节奏来。' : `${shortDate(key)}，按自己的节奏来。`;
+        const daily=thoughtForDay(selectedDay);
+        document.getElementById('thought-text').textContent = daily.quote.text;
+        document.getElementById('thought-source').textContent = `— ${daily.quote.author} · ${daily.quote.work}`;
+        document.getElementById('thought-index').textContent = `第 ${String(daily.day).padStart(2,'0')} / 90 天`;
+        document.getElementById('date-picker').value = key;
+        const tasks = tasksForDay(key), completed = tasks.filter(task=>task.done).length;
+        const percentage = tasks.length ? Math.round(completed / tasks.length * 100) : 0;
+        document.getElementById('task-total').textContent = `${tasks.length} 项`;
+        document.getElementById('progress-number').textContent = `${percentage}%`;
+        document.getElementById('progress-ring').style.setProperty('--progress',`${percentage}%`);
+        document.getElementById('progress-fill').style.width = `${percentage}%`;
+        document.getElementById('progress-title').textContent = tasks.length ? (percentage===100 ? '今天的计划全部完成' : `已完成 ${completed} / ${tasks.length} 项`) : '今天刚刚开始';
+        document.getElementById('progress-caption').textContent = tasks.length ? (percentage===100 ? '为自己留一点庆祝的时间' : '慢慢来，完成一项就很好') : '写下今天想完成的第一件事';
+        const taskList = document.getElementById('task-list');
+        if (!tasks.length) taskList.innerHTML = '<div class="empty-state"><div class="empty-symbol">✳</div><div class="empty-title">今天还没有安排</div><div class="empty-caption">从一件小事开始，给今天一个方向。</div></div>';
+        else taskList.innerHTML = tasks.map(task => `<div class="task-row ${task.done?'completed':''}" data-id="${task.id}"><button class="check ${task.done?'done':''}" data-action="toggle" aria-label="${task.done?'标记未完成':'标记完成'}">${task.done?'✓':''}</button><span class="priority ${task.priority==='normal'?'normal':task.priority==='low'?'low':''}" title="${task.priority==='high'?'重要':task.priority==='low'?'稍后':'普通'}"></span><div class="task-main"><div class="task-name">${escapeHTML(task.text)}</div><div class="task-meta">${task.priority==='high'?'重要':task.priority==='low'?'稍后处理':'普通'}</div></div><button class="task-delete" data-action="delete" aria-label="删除任务" title="删除任务">×</button></div>`).join('');
+        const note = data.notes.find(item=>item.date===key && item.quick) || data.notes.find(item=>item.date===key);
+        document.getElementById('quick-note').value = note ? note.body : '';
+        renderRecentNotes(); renderSidebar();
+      }
+      function renderSidebar() {
+        const key=dateKey(today), todays=tasksForDay(key);
+        document.getElementById('nav-task-count').textContent=todays.filter(t=>!t.done).length;
+        document.getElementById('nav-note-count').textContent=data.notes.length;
+        const start=new Date(today); start.setDate(today.getDate()-((today.getDay()+6)%7));
+        const labels=['一','二','三','四','五','六','日'];
+        let completedWeek=0;
+        document.getElementById('week-days').innerHTML=labels.map((label,index)=>{const d=new Date(start);d.setDate(start.getDate()+index);const count=tasksForDay(dateKey(d)).filter(t=>t.done).length;completedWeek+=count;return `<div class="week-day">${label}<div class="week-date ${sameDay(d,today)?'today':''}">${d.getDate()}</div></div>`}).join('');
+        document.getElementById('week-progress').textContent=`${completedWeek} 项完成`;
+      }
+      function renderRecentNotes() {
+        const recent=notesSorted().slice(0,3), el=document.getElementById('recent-notes');
+        el.innerHTML=recent.length?recent.map(note=>`<button class="note-preview" data-note="${note.id}"><span class="note-preview-title">${escapeHTML(note.title||'随手记')}</span><span class="note-preview-body">${escapeHTML(note.body)}</span><span class="note-preview-date">${shortDate(note.date,true)}</span></button>`).join(''):'<div class="recent-empty">还没有随笔，记下此刻的想法吧。</div>';
+      }
+      function renderNotes() {
+        const query=document.getElementById('note-search').value.trim().toLowerCase();
+        const notes=notesSorted().filter(note=>`${note.title} ${note.body}`.toLowerCase().includes(query));
+        document.getElementById('notes-total').textContent=`(${notes.length})`;
+        const list=document.getElementById('notes-list');
+        list.innerHTML=notes.length?notes.map(note=>`<button class="note-list-item ${note.id===selectedNoteId?'selected':''}" data-note="${note.id}"><strong>${escapeHTML(note.title||'随手记')}</strong><span>${escapeHTML(note.body)}</span><time>${shortDate(note.date,true)}</time></button>`).join(''):'<div class="recent-empty">没有找到随笔</div>';
+        const selected=data.notes.find(note=>note.id===selectedNoteId);
+        if(selected){document.getElementById('note-title').value=selected.title;document.getElementById('note-body').value=selected.body;document.getElementById('editor-status').textContent=`${shortDate(selected.date,true)} · 已保存`}
+        else {document.getElementById('note-title').value='';document.getElementById('note-body').value='';document.getElementById('editor-status').textContent='选择一条随笔，或开始新的记录'}
+      }
+      function renderCalendar() {
+        const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth();
+        document.getElementById('calendar-month').textContent=new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long'}).format(calendarMonth);
+        const first=new Date(year,month,1), offset=(first.getDay()+6)%7, days=new Date(year,month+1,0).getDate(), prevDays=new Date(year,month,0).getDate();
+        const labels=['一','二','三','四','五','六','日'];
+        let html=labels.map(label=>`<div class="calendar-weekday">${label}</div>`).join('');
+        for(let i=0;i<42;i++){
+          let date, outside=false;
+          if(i<offset){date=new Date(year,month-1,prevDays-offset+i+1);outside=true}
+          else if(i>=offset+days){date=new Date(year,month+1,i-offset-days+1);outside=true}
+          else date=new Date(year,month,i-offset+1);
+          const key=dateKey(date), tasks=tasksForDay(key), hasNote=data.notes.some(note=>note.date===key);
+          const dots=`${tasks.length?'<i class="day-dot"></i>':''}${hasNote?'<i class="day-dot" style="background:var(--coral)"></i>':''}`;
+          html+=`<button class="calendar-day ${outside?'outside':''} ${sameDay(date,today)?'today':''} ${sameDay(date,selectedDay)?'selected':''}" data-date="${key}">${date.getDate()}<span class="day-dots">${dots}</span></button>`;
+        }
+        document.getElementById('calendar-grid').innerHTML=html;
+        const key=dateKey(selectedDay), selectedTasks=tasksForDay(key), done=selectedTasks.filter(t=>t.done).length, noteCount=data.notes.filter(n=>n.date===key).length;
+        document.getElementById('calendar-summary').innerHTML=`<strong style="color:var(--ink)">${fullDate(selectedDay)}</strong><br><span style="display:inline-block;margin-top:8px">${selectedTasks.length?`${done} / ${selectedTasks.length} 项任务完成`: '没有任务记录'} · ${noteCount?`${noteCount} 篇随笔`:'没有随笔'}</span>`;
+      }
+      function setView(name) {
+        document.querySelectorAll('.today-view,.notes-view,.calendar-view').forEach(el=>el.style.display='none');
+        document.getElementById(`${name}-view`).style.display='block';
+        document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));
+        if(name==='notes')renderNotes(); if(name==='calendar')renderCalendar();
+      }
+      function makeId() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`; }
+      document.getElementById('task-form').addEventListener('submit',event=>{
+        event.preventDefault(); const input=document.getElementById('task-input'), text=input.value.trim(); if(!text){input.focus();return}
+        data.tasks.push({id:makeId(),text,date:dateKey(selectedDay),done:false,priority:document.getElementById('task-priority').value,createdAt:Date.now()});persist();input.value='';renderToday();input.focus();
+      });
+      document.getElementById('task-list').addEventListener('click',event=>{
+        const button=event.target.closest('[data-action]'); if(!button)return; const row=button.closest('.task-row'), task=data.tasks.find(item=>item.id===row.dataset.id); if(!task)return;
+        if(button.dataset.action==='toggle')task.done=!task.done; else if(button.dataset.action==='delete')data.tasks=data.tasks.filter(item=>item.id!==task.id);persist();renderToday();
+      });
+      document.getElementById('save-note').addEventListener('click',()=>{
+        const body=document.getElementById('quick-note').value.trim(), key=dateKey(selectedDay);
+        let note=data.notes.find(item=>item.date===key&&item.quick)||data.notes.find(item=>item.date===key);
+        if(!body){if(note){data.notes=data.notes.filter(item=>item.id!==note.id);persist();renderToday();showToast('这一天的随笔已清空')}else showToast('写下一点想法再保存');return}
+        if(note){note.body=body;note.updatedAt=Date.now()}else{note={id:makeId(),title:'',body,date:key,createdAt:Date.now(),updatedAt:Date.now(),quick:true};data.notes.push(note)}
+        persist();renderToday();showToast('随笔已保存');
+      });
+      document.getElementById('quick-note').addEventListener('input',()=>{document.getElementById('save-hint').textContent='写完后点击保存随笔';});
+      document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>setView(button.dataset.view)));
+      document.querySelector('[data-open-view="notes"]').addEventListener('click',()=>setView('notes'));
+      document.getElementById('prev-day').addEventListener('click',()=>{selectedDay.setDate(selectedDay.getDate()-1);renderToday()});
+      document.getElementById('next-day').addEventListener('click',()=>{selectedDay.setDate(selectedDay.getDate()+1);renderToday()});
+      document.getElementById('go-today').addEventListener('click',()=>{selectedDay=new Date(today);renderToday()});
+      document.getElementById('date-picker').addEventListener('change',event=>{if(event.target.value){selectedDay=parseDay(event.target.value);renderToday()}});
+      document.getElementById('recent-notes').addEventListener('click',event=>{const item=event.target.closest('[data-note]');if(item){selectedNoteId=item.dataset.note;setView('notes')}});
+      document.getElementById('note-search').addEventListener('input',renderNotes);
+      document.getElementById('notes-list').addEventListener('click',event=>{const item=event.target.closest('[data-note]');if(item){selectedNoteId=item.dataset.note;renderNotes()}});
+      document.getElementById('new-note').addEventListener('click',()=>{selectedNoteId=null;renderNotes();document.getElementById('note-title').focus()});
+      document.getElementById('editor-save').addEventListener('click',()=>{
+        const title=document.getElementById('note-title').value.trim(),body=document.getElementById('note-body').value.trim();
+        if(!title&&!body){showToast('写一点内容再保存');return}
+        const note=data.notes.find(item=>item.id===selectedNoteId);
+        if(note){note.title=title;note.body=body;note.updatedAt=Date.now()}
+        else{const created={id:makeId(),title,body,date:dateKey(today),createdAt:Date.now(),updatedAt:Date.now(),quick:false};data.notes.push(created);selectedNoteId=created.id}
+        persist();renderNotes();renderToday();showToast('随笔已保存');
+      });
+      document.getElementById('prev-month').addEventListener('click',()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);renderCalendar()});
+      document.getElementById('next-month').addEventListener('click',()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);renderCalendar()});
+      document.getElementById('calendar-grid').addEventListener('click',event=>{const button=event.target.closest('[data-date]');if(!button)return;selectedDay=parseDay(button.dataset.date);calendarMonth=new Date(selectedDay.getFullYear(),selectedDay.getMonth(),1);renderCalendar();renderToday()});
+      document.getElementById('export-button').addEventListener('click',()=>{
+        const file=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...data},null,2)],{type:'application/json'}),url=URL.createObjectURL(file),link=document.createElement('a');
+        link.href=url;link.download=`daily-backup-${dateKey(today)}.json`;link.click();URL.revokeObjectURL(url);showToast('数据备份已导出');
+      });
+      renderToday();renderCalendar();
+    })();
+  </script>
+</body>
+</html>
