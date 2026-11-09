@@ -1,4 +1,4 @@
-<!doctype html>
+type html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -135,7 +135,7 @@
     .note-preview-body { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 5px; color: #78827b; font-size: 10px; line-height: 1.6; }
     .note-preview-date { display: block; margin-top: 7px; color: #a0a9a2; font-size: 9px; }
     .recent-empty { padding: 18px 0 22px; text-align: center; color: #97a199; font-size: 10px; }
-    .notes-view, .calendar-view { display: none; }
+    .notes-view, .calendar-view, .goals-view { display: none; }
     .view-heading { margin: 39px 0 25px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
     .view-heading h1 { font-size: 28px; }
     .view-heading p { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
@@ -168,6 +168,31 @@
     .day-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
     .calendar-day.selected .day-dot { background: white; }
     .selected-date-summary { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 15px; font-size: 11px; color: var(--muted); }
+    .goals-layout { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.3fr); gap: 20px; align-items: start; }
+    .goal-form-panel, .goal-list-panel { padding: 21px; }
+    .goal-form { display: grid; gap: 11px; margin-top: 16px; }
+    .goal-form input, .goal-form textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px 11px; background: #fcfdfc; color: var(--ink); font-size: 11px; }
+    .goal-form textarea { min-height: 76px; resize: vertical; line-height: 1.6; }
+    .goal-form input::placeholder, .goal-form textarea::placeholder { color: #9ca59f; }
+    .goal-form label { display: grid; gap: 6px; color: #78827b; font-size: 10px; }
+    .goal-form .primary-button { justify-self: start; padding: 10px 14px; }
+    .goals-summary { color: var(--muted); font-size: 10px; }
+    .goal-list { display: grid; gap: 11px; margin-top: 14px; }
+    .goal-card { border: 1px solid var(--line); border-radius: 9px; padding: 15px; background: #fff; }
+    .goal-card.is-done { background: #f7faf7; }
+    .goal-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .goal-title { font-size: 13px; line-height: 1.5; font-weight: 700; overflow-wrap: anywhere; }
+    .goal-card.is-done .goal-title { color: #7f8b81; }
+    .goal-deadline { margin-top: 4px; color: #929d94; font-size: 9px; }
+    .goal-delete { flex: 0 0 auto; border: 0; background: transparent; color: #9ca59e; border-radius: 6px; width: 28px; height: 28px; font-size: 17px; cursor: pointer; }
+    .goal-delete:hover { color: #bd6249; background: #fbefeb; }
+    .goal-description { margin: 11px 0 13px; color: #758078; font-size: 10px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .goal-progress-row { display: flex; align-items: center; gap: 11px; }
+    .goal-progress-row input { flex: 1; min-width: 0; accent-color: var(--green); cursor: pointer; }
+    .goal-percent { min-width: 34px; text-align: right; color: var(--green-dark); font-size: 10px; font-weight: 700; }
+    .goal-progress-track { height: 4px; margin-top: 5px; background: #e7eee8; border-radius: 5px; overflow: hidden; }
+    .goal-progress-track span { display: block; height: 100%; width: 0; background: var(--green); border-radius: inherit; transition: width .2s; }
+    .goal-empty { padding: 34px 10px; text-align: center; color: #97a199; font-size: 10px; }
     .toast { position: fixed; left: 50%; bottom: 28px; z-index: 20; transform: translate(-50%, 12px); background: #253b2d; color: white; padding: 10px 15px; border-radius: 8px; font-size: 11px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; box-shadow: 0 8px 25px rgba(20,40,27,.18); }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
     .mobile-nav { display: none; }
@@ -198,7 +223,7 @@
       .journal-panel textarea { min-height: 125px; }
       .recent-panel { padding: 18px 18px 7px; }
       .task-delete { opacity: 1; }
-      .mobile-nav { position: fixed; inset: auto 0 0; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px max(12px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(255,255,255,.96); backdrop-filter: blur(14px); }
+      .mobile-nav { position: fixed; inset: auto 0 0; z-index: 10; display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px max(12px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(255,255,255,.96); backdrop-filter: blur(14px); }
       .mobile-nav .nav-button { min-height: 48px; justify-content: center; flex-direction: column; gap: 3px; padding: 3px; font-size: 9px; }
       .mobile-nav .nav-icon { font-size: 16px; }
       .mobile-nav .nav-count { display: none; }
@@ -210,6 +235,8 @@
       .note-editor { padding: 18px; }
       .calendar-panel { padding: 17px; }
       .calendar-day { min-height: 53px; padding: 6px; }
+      .goals-layout { grid-template-columns: 1fr; gap: 15px; }
+      .goal-form-panel, .goal-list-panel { padding: 17px; }
     }
     @media (max-width: 390px) {
       .main { padding-left: 13px; padding-right: 13px; }
@@ -235,6 +262,7 @@
         <button class="nav-button active" data-view="today"><span class="nav-icon">◷</span><span>今天</span><span class="nav-count" id="nav-task-count">0</span></button>
         <button class="nav-button" data-view="notes"><span class="nav-icon">▤</span><span>随笔</span><span class="nav-count" id="nav-note-count">0</span></button>
         <button class="nav-button" data-view="calendar"><span class="nav-icon">▦</span><span>日历</span></button>
+        <button class="nav-button" data-view="goals"><span class="nav-icon">◎</span><span>目标</span></button>
       </nav>
       <div class="sidebar-bottom">
         <div class="week-card">
@@ -281,11 +309,21 @@
         <header class="view-heading"><div><div class="eyebrow">YOUR DAYS</div><h1>日历</h1><p>回头看看，一天一天走过的痕迹。</p></div></header>
         <section class="panel calendar-panel"><div class="calendar-toolbar"><strong id="calendar-month"></strong><div class="calendar-arrows"><button id="prev-month" aria-label="上个月">‹</button><button id="next-month" aria-label="下个月">›</button></div></div><div class="calendar-grid" id="calendar-grid"></div><div class="selected-date-summary" id="calendar-summary"></div></section>
       </section>
+      <section class="goals-view" id="goals-view">
+        <header class="view-heading"><div><div class="eyebrow">LONG-TERM</div><h1>长期目标</h1><p>把想去的地方，拆成持续向前的每一步。</p></div></header>
+        <div class="goals-layout">
+          <section class="panel goal-form-panel"><h2 class="panel-title">设定一个目标</h2><p class="panel-description">先写下方向，之后随时更新进度。</p>
+            <form class="goal-form" id="goal-form"><input id="goal-title-input" maxlength="100" required placeholder="例如：完成一本自己的书" aria-label="目标名称"><label>计划完成日期（可选）<input id="goal-date-input" type="date" aria-label="计划完成日期"></label><textarea id="goal-description-input" maxlength="500" placeholder="为什么它对你重要？可以写下想法或下一步…" aria-label="目标备注"></textarea><button class="primary-button" type="submit">＋ 添加目标</button></form>
+          </section>
+          <section class="panel goal-list-panel"><div class="panel-head"><div><h2 class="panel-title">我的目标</h2><p class="panel-description">进度可以随时调整，不必一步到位。</p></div><span class="goals-summary" id="goals-summary"></span></div><div class="goal-list" id="goal-list"></div></section>
+        </div>
+      </section>
     </main>
     <nav class="mobile-nav" aria-label="底部导航">
       <button class="nav-button active" data-view="today"><span class="nav-icon">◷</span><span>今天</span></button>
       <button class="nav-button" data-view="notes"><span class="nav-icon">▤</span><span>随笔</span></button>
       <button class="nav-button" data-view="calendar"><span class="nav-icon">▦</span><span>日历</span></button>
+      <button class="nav-button" data-view="goals"><span class="nav-icon">◎</span><span>目标</span></button>
     </nav>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
@@ -395,8 +433,8 @@
       function loadData() {
         try {
           const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-          return { tasks: Array.isArray(raw.tasks) ? raw.tasks : [], notes: Array.isArray(raw.notes) ? raw.notes : [] };
-        } catch { return { tasks: [], notes: [] }; }
+          return { tasks: Array.isArray(raw.tasks) ? raw.tasks : [], notes: Array.isArray(raw.notes) ? raw.notes : [], goals: Array.isArray(raw.goals) ? raw.goals : [] };
+        } catch { return { tasks: [], notes: [], goals: [] }; }
       }
       function persist() { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
       function dateKey(date) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
@@ -489,11 +527,18 @@
         const key=dateKey(selectedDay), selectedTasks=tasksForDay(key), done=selectedTasks.filter(t=>t.done).length, noteCount=data.notes.filter(n=>n.date===key).length;
         document.getElementById('calendar-summary').innerHTML=`<strong style="color:var(--ink)">${fullDate(selectedDay)}</strong><br><span style="display:inline-block;margin-top:8px">${selectedTasks.length?`${done} / ${selectedTasks.length} 项任务完成`: '没有任务记录'} · ${noteCount?`${noteCount} 篇随笔`:'没有随笔'}</span>`;
       }
+      function renderGoals() {
+        const goals=[...data.goals].sort((a,b)=>b.createdAt-a.createdAt), completed=goals.filter(goal=>goal.progress===100).length;
+        document.getElementById('goals-summary').textContent=goals.length?`${completed} / ${goals.length} 已完成`:'';
+        const list=document.getElementById('goal-list');
+        if(!goals.length){list.innerHTML='<div class="goal-empty">还没有长期目标。写下一个对你重要的方向吧。</div>';return}
+        list.innerHTML=goals.map(goal=>`<article class="goal-card ${goal.progress===100?'is-done':''}" data-goal="${goal.id}"><div class="goal-card-top"><div><div class="goal-title">${escapeHTML(goal.title)}</div><div class="goal-deadline">${goal.dueDate?`计划完成 · ${fullDate(parseDay(goal.dueDate))}`:'暂不设定期限'}${goal.progress===100?' · 已完成':''}</div></div><button class="goal-delete" data-action="delete-goal" aria-label="删除目标" title="删除目标">×</button></div>${goal.description?`<p class="goal-description">${escapeHTML(goal.description)}</p>`:''}<div class="goal-progress-row"><input type="range" min="0" max="100" step="5" value="${goal.progress}" data-action="goal-progress" aria-label="${escapeHTML(goal.title)}进度"><span class="goal-percent">${goal.progress}%</span></div><div class="goal-progress-track"><span style="width:${goal.progress}%"></span></div></article>`).join('');
+      }
       function setView(name) {
-        document.querySelectorAll('.today-view,.notes-view,.calendar-view').forEach(el=>el.style.display='none');
+        document.querySelectorAll('.today-view,.notes-view,.calendar-view,.goals-view').forEach(el=>el.style.display='none');
         document.getElementById(`${name}-view`).style.display='block';
         document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));
-        if(name==='notes')renderNotes(); if(name==='calendar')renderCalendar();
+        if(name==='notes')renderNotes(); if(name==='calendar')renderCalendar(); if(name==='goals')renderGoals();
       }
       function makeId() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`; }
       document.getElementById('task-form').addEventListener('submit',event=>{
@@ -533,6 +578,25 @@
       document.getElementById('prev-month').addEventListener('click',()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);renderCalendar()});
       document.getElementById('next-month').addEventListener('click',()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);renderCalendar()});
       document.getElementById('calendar-grid').addEventListener('click',event=>{const button=event.target.closest('[data-date]');if(!button)return;selectedDay=parseDay(button.dataset.date);calendarMonth=new Date(selectedDay.getFullYear(),selectedDay.getMonth(),1);renderCalendar();renderToday()});
+      document.getElementById('goal-form').addEventListener('submit',event=>{
+        event.preventDefault();const title=document.getElementById('goal-title-input').value.trim();if(!title)return;
+        const dueDate=document.getElementById('goal-date-input').value,description=document.getElementById('goal-description-input').value.trim();
+        data.goals.push({id:makeId(),title,dueDate,description,progress:0,createdAt:Date.now()});persist();event.currentTarget.reset();renderGoals();showToast('长期目标已添加');
+      });
+      document.getElementById('goal-list').addEventListener('input',event=>{
+        const slider=event.target.closest('[data-action="goal-progress"]');if(!slider)return;
+        const card=slider.closest('[data-goal]'),goal=data.goals.find(item=>item.id===card.dataset.goal);if(!goal)return;
+        goal.progress=Number(slider.value);card.querySelector('.goal-percent').textContent=`${goal.progress}%`;card.querySelector('.goal-progress-track span').style.width=`${goal.progress}%`;
+        card.classList.toggle('is-done',goal.progress===100);const due=card.querySelector('.goal-deadline');due.textContent=`${goal.dueDate?`计划完成 · ${fullDate(parseDay(goal.dueDate))}`:'暂不设定期限'}${goal.progress===100?' · 已完成':''}`;
+        document.getElementById('goals-summary').textContent=`${data.goals.filter(item=>item.progress===100).length} / ${data.goals.length} 已完成`;
+      });
+      document.getElementById('goal-list').addEventListener('change',event=>{
+        if(event.target.matches('[data-action="goal-progress"]')){persist();renderGoals();showToast('目标进度已更新')}
+      });
+      document.getElementById('goal-list').addEventListener('click',event=>{
+        const button=event.target.closest('[data-action="delete-goal"]');if(!button)return;
+        const card=button.closest('[data-goal]');data.goals=data.goals.filter(goal=>goal.id!==card.dataset.goal);persist();renderGoals();showToast('目标已删除');
+      });
       document.getElementById('export-button').addEventListener('click',()=>{
         const file=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...data},null,2)],{type:'application/json'}),url=URL.createObjectURL(file),link=document.createElement('a');
         link.href=url;link.download=`daily-backup-${dateKey(today)}.json`;link.click();URL.revokeObjectURL(url);showToast('数据备份已导出');
